@@ -238,3 +238,108 @@ elif page == "Smart Segmentation":
 
         else:
             st.error("Marketing Strategy: Focus on budget-friendly campaigns.")
+# ===========================
+# MARKETING SUGGESTIONS
+# ===========================
+
+elif page == "Marketing Suggestions":
+
+    st.title("🎯 Marketing Suggestions")
+
+    st.markdown("""
+### Suggested Strategies
+
+💎 **Premium Customers**
+- Offer VIP memberships
+- Exclusive product launches
+- Premium rewards
+
+🛍 **Regular Customers**
+- Seasonal discounts
+- Cashback offers
+- Bundle deals
+
+💰 **High Income - Low Spending**
+- Personalized recommendations
+- Premium advertisements
+- Loyalty campaigns
+
+🎯 **Budget Customers**
+- Affordable products
+- Discount coupons
+- Festival sales
+
+⭐ **High Spending Customers**
+- Reward points
+- Early access to sales
+- Referral bonuses
+""")
+
+# ===========================
+# EXPORT REPORT
+# ===========================
+
+elif page == "Export Report":
+
+    st.title("📥 Export Report")
+
+    X = df[["Annual Income (k$)", "Spending Score (1-100)"]]
+
+    model = KMeans(
+        n_clusters=5,
+        random_state=42,
+        n_init=10
+    )
+
+    df["Cluster"] = model.fit_predict(X)
+
+    csv = df.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="📥 Download Clustered Dataset",
+        data=csv,
+        file_name="Mall_Customers_Segmented.csv",
+        mime="text/csv"
+    )
+
+# ===========================
+# ABOUT
+# ===========================
+
+elif page == "About":
+
+    st.title("ℹ About")
+
+    st.markdown("""
+## Retail Customer Intelligence
+
+This project demonstrates **Customer Segmentation using the K-Means Clustering Algorithm**.
+
+### Technologies Used
+
+- Python
+- Pandas
+- Plotly
+- Scikit-Learn
+- Streamlit
+
+### Machine Learning Technique
+
+- Unsupervised Learning
+- K-Means Clustering
+
+### Dataset
+
+Mall Customers Dataset
+
+---
+
+### Developed By
+
+**Swayam Shaswat Sen**
+
+Internship Project
+""")
+
+st.markdown("---")
+st.caption("© 2026 Retail Customer Intelligence Dashboard")
