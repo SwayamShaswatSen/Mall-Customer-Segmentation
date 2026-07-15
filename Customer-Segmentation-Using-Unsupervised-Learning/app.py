@@ -1,111 +1,126 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from sklearn.cluster import KMeans
 from pathlib import Path
 
-# ---------------- PAGE CONFIG ----------------
+# ---------------- PAGE ---------------- #
+
 st.set_page_config(
-    page_title="Mall Customer Analytics",
-    page_icon="🛍️",
+    page_title="Customer Analytics Dashboard",
+    page_icon="🛍",
     layout="wide"
 )
 
-# ---------------- CUSTOM CSS ----------------
+# ---------------- CSS ---------------- #
+
 st.markdown("""
 <style>
 
+html, body, [class*="css"]{
+    background:#09090B;
+    color:white;
+    font-family:Arial;
+}
+
 .main{
-    background:#0E1117;
+    background:#09090B;
+}
+
+.block-container{
+    padding-top:2rem;
 }
 
 h1{
+    text-align:center;
+    color:#00F5FF;
+    font-size:52px;
+}
+
+h2,h3{
     color:white;
 }
 
-.stMetric{
-    background:#1E1E1E;
-    padding:15px;
-    border-radius:15px;
-    box-shadow:0px 0px 20px rgba(0,255,255,.15);
+div[data-testid="stMetric"]{
+
+    background:#111827;
+
+    border-radius:18px;
+
+    padding:18px;
+
+    border:1px solid #1F2937;
+
+    box-shadow:0px 0px 25px rgba(0,255,255,.12);
+
 }
 
-div[data-testid="stDataFrame"]{
-    border-radius:15px;
+.sidebar .sidebar-content{
+    background:#111827;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- TITLE ----------------
-st.title("🛍️ Mall Customer Analytics Dashboard")
-st.markdown("### AI-Powered Customer Segmentation using K-Means")
-st.markdown("---")
+# ---------------- HERO ---------------- #
 
-# ---------------- LOAD DATA ----------------
+st.markdown("""
+# 🛍 Customer Analytics Dashboard
+
+### AI Powered Customer Segmentation using K-Means
+
+---
+""")
+
+# ---------------- LOAD DATA ---------------- #
+
 BASE_DIR = Path(__file__).parent
-df = pd.read_csv(BASE_DIR / "Mall_Customers.csv")
 
-# ---------------- DASHBOARD METRICS ----------------
-col1, col2, col3, col4 = st.columns(4)
+df = pd.read_csv(BASE_DIR/"Mall_Customers.csv")
 
-with col1:
-    st.metric("👥 Customers", len(df))
+# ---------------- SIDEBAR ---------------- #
 
-with col2:
-    st.metric("💰 Avg Income", f"{df['Annual Income (k$)'].mean():.1f} K")
+st.sidebar.title("⚙ Dashboard")
 
-with col3:
-    st.metric("🎯 Avg Spending", f"{df['Spending Score (1-100)'].mean():.1f}")
-
-with col4:
-    st.metric("🧑 Avg Age", f"{df['Age'].mean():.1f}")
-
-# ---------------- DATASET ----------------
-st.subheader("📄 Dataset Preview")
-st.dataframe(df.head(), use_container_width=True)
-
-# ---------------- CUSTOMER DISTRIBUTION ----------------
-st.subheader("📊 Customer Distribution")
-
-fig = px.scatter(
-    df,
-    x="Annual Income (k$)",
-    y="Spending Score (1-100)",
-    color="Gender",
-    size="Age",
-    title="Mall Customers Overview"
+clusters = st.sidebar.slider(
+    "Number of Clusters",
+    2,
+    10,
+    5
 )
 
-st.plotly_chart(fig, use_container_width=True)
-
-# ---------------- K-MEANS ----------------
-X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
-
-kmeans = KMeans(
-    n_clusters=5,
-    random_state=42,
-    n_init=10
+show_data = st.sidebar.checkbox(
+    "Show Dataset",
+    True
 )
 
-df["Cluster"] = kmeans.fit_predict(X)
+# ---------------- METRICS ---------------- #
 
-# ---------------- CLUSTER GRAPH ----------------
-st.subheader("🎯 Customer Segments")
+c1,c2,c3,c4 = st.columns(4)
 
-fig2 = px.scatter(
-    df,
-    x="Annual Income (k$)",
-    y="Spending Score (1-100)",
-    color=df["Cluster"].astype(str),
-    title="Customer Segmentation using K-Means"
-)
+with c1:
+    st.metric(
+        "👥 Customers",
+        len(df)
+    )
 
-st.plotly_chart(fig2, use_container_width=True)
+with c2:
+    st.metric(
+        "💰 Avg Income",
+        f"{df['Annual Income (k$)'].mean():.1f} K"
+    )
 
-# ---------------- SUMMARY ----------------
-st.subheader("📋 Cluster Summary")
-st.dataframe(df.groupby("Cluster").mean(numeric_only=True), use_container_width=True)
+with c3:
+    st.metric(
+        "🎯 Avg Spending",
+        f"{df['Spending Score (1-100)'].mean():.1f}"
+    )
 
-# ---------------- SUCCESS ----------------
-st.success("✅ Project Completed Successfully!")
+with c4:
+    st.metric(
+        "🧑 Avg Age",
+        f"{df['Age'].mean():.1f}"
+    )
+
+st.markdown("---")
