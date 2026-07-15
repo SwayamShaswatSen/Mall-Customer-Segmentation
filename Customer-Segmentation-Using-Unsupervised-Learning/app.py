@@ -10,7 +10,10 @@ st.write("### Internship Project")
 st.write("This project uses K-Means Clustering to segment mall customers based on Annual Income and Spending Score.")
 
 # Load dataset
-df = pd.read_csv("Mall_Customers.csv")
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent
+df = pd.read_csv(BASE_DIR / "Mall_Customers.csv")
 
 st.subheader("Dataset Preview")
 st.dataframe(df.head())
