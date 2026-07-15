@@ -262,3 +262,84 @@ with right:
     )
 
 st.markdown("---")
+# ---------------- DOWNLOAD DATA ---------------- #
+
+st.markdown("---")
+
+st.subheader("📥 Download Clustered Dataset")
+
+csv = df.to_csv(index=False).encode("utf-8")
+
+st.download_button(
+    label="⬇ Download CSV",
+    data=csv,
+    file_name="Mall_Customers_Segmented.csv",
+    mime="text/csv"
+)
+
+# ---------------- BUSINESS INSIGHTS ---------------- #
+
+st.markdown("---")
+
+st.subheader("🧠 Business Insights")
+
+cluster_summary = df.groupby("Cluster")[["Annual Income (k$)", "Spending Score (1-100)", "Age"]].mean()
+
+for cluster in cluster_summary.index:
+
+    income = cluster_summary.loc[cluster, "Annual Income (k$)"]
+    spending = cluster_summary.loc[cluster, "Spending Score (1-100)"]
+
+    if income > 60 and spending > 60:
+        insight = "💎 Premium Customers — Reward with exclusive loyalty programs and premium offers."
+
+    elif income > 60 and spending <= 60:
+        insight = "💰 High Income, Low Spending — Target with personalized promotions."
+
+    elif income <= 60 and spending > 60:
+        insight = "🛍 High Spending, Moderate Income — Offer discounts and reward points."
+
+    else:
+        insight = "🎯 Budget Customers — Focus on affordable deals and seasonal campaigns."
+
+    with st.expander(f"Cluster {cluster}"):
+        st.write(insight)
+
+# ---------------- PROJECT SUMMARY ---------------- #
+
+st.markdown("---")
+
+st.subheader("📋 Project Summary")
+
+st.success("""
+✔ Dataset Loaded Successfully
+
+✔ Data Visualized
+
+✔ K-Means Clustering Applied
+
+✔ Customer Segments Identified
+
+✔ Business Insights Generated
+""")
+
+# ---------------- FOOTER ---------------- #
+
+st.markdown("---")
+
+st.markdown(
+"""
+<div style='text-align:center;padding:20px'>
+
+<h3>🛍 Mall Customer Analytics Dashboard</h3>
+
+<p>Internship Project</p>
+
+<p><b>Developed by Swayam Shaswat Sen</b></p>
+
+</div>
+""",
+unsafe_allow_html=True
+)
+
+st.balloons()
