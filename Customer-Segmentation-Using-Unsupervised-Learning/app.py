@@ -2,13 +2,16 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from sklearn.cluster import KMeans
+from pathlib import Path
 
+# ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="Mall Customer Analytics",
     page_icon="🛍️",
     layout="wide"
 )
 
+# ---------------- CUSTOM CSS ----------------
 st.markdown("""
 <style>
 
@@ -34,23 +37,36 @@ div[data-testid="stDataFrame"]{
 </style>
 """, unsafe_allow_html=True)
 
-st.set_page_config(page_title="Mall Customer Segmentation", layout="wide")
+# ---------------- TITLE ----------------
+st.title("🛍️ Mall Customer Analytics Dashboard")
+st.markdown("### AI-Powered Customer Segmentation using K-Means")
+st.markdown("---")
 
-st.title("🛍️ Mall Customer Segmentation")
-st.write("### Internship Project")
-st.write("This project uses K-Means Clustering to segment mall customers based on Annual Income and Spending Score.")
-
-# Load dataset
-from pathlib import Path
-
+# ---------------- LOAD DATA ----------------
 BASE_DIR = Path(__file__).parent
 df = pd.read_csv(BASE_DIR / "Mall_Customers.csv")
 
-st.subheader("Dataset Preview")
-st.dataframe(df.head())
+# ---------------- DASHBOARD METRICS ----------------
+col1, col2, col3, col4 = st.columns(4)
 
-# Scatter plot
-st.subheader("Customer Distribution")
+with col1:
+    st.metric("👥 Customers", len(df))
+
+with col2:
+    st.metric("💰 Avg Income", f"{df['Annual Income (k$)'].mean():.1f} K")
+
+with col3:
+    st.metric("🎯 Avg Spending", f"{df['Spending Score (1-100)'].mean():.1f}")
+
+with col4:
+    st.metric("🧑 Avg Age", f"{df['Age'].mean():.1f}")
+
+# ---------------- DATASET ----------------
+st.subheader("📄 Dataset Preview")
+st.dataframe(df.head(), use_container_width=True)
+
+# ---------------- CUSTOMER DISTRIBUTION ----------------
+st.subheader("📊 Customer Distribution")
 
 fig = px.scatter(
     df,
@@ -63,7 +79,7 @@ fig = px.scatter(
 
 st.plotly_chart(fig, use_container_width=True)
 
-# K-Means
+# ---------------- K-MEANS ----------------
 X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
 
 kmeans = KMeans(
@@ -74,7 +90,8 @@ kmeans = KMeans(
 
 df["Cluster"] = kmeans.fit_predict(X)
 
-st.subheader("Customer Segments")
+# ---------------- CLUSTER GRAPH ----------------
+st.subheader("🎯 Customer Segments")
 
 fig2 = px.scatter(
     df,
@@ -86,7 +103,9 @@ fig2 = px.scatter(
 
 st.plotly_chart(fig2, use_container_width=True)
 
-st.subheader("Cluster Summary")
-st.dataframe(df.groupby("Cluster").mean(numeric_only=True))
+# ---------------- SUMMARY ----------------
+st.subheader("📋 Cluster Summary")
+st.dataframe(df.groupby("Cluster").mean(numeric_only=True), use_container_width=True)
 
-st.success("Project Completed Successfully ✅")
+# ---------------- SUCCESS ----------------
+st.success("✅ Project Completed Successfully!")
