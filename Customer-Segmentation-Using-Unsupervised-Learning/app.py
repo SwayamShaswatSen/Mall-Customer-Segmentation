@@ -124,3 +124,141 @@ with c4:
     )
 
 st.markdown("---")
+# ---------------- DATASET ---------------- #
+
+if show_data:
+
+    st.subheader("📄 Dataset Preview")
+
+    st.dataframe(
+        df,
+        use_container_width=True,
+        height=300
+    )
+
+st.markdown("---")
+
+# ---------------- KMEANS ---------------- #
+
+X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
+
+kmeans = KMeans(
+    n_clusters=clusters,
+    random_state=42,
+    n_init=10
+)
+
+df["Cluster"] = kmeans.fit_predict(X)
+
+# ---------------- MAIN CHART ---------------- #
+
+st.subheader("📊 Customer Segmentation")
+
+fig = px.scatter(
+
+    df,
+
+    x="Annual Income (k$)",
+
+    y="Spending Score (1-100)",
+
+    color=df["Cluster"].astype(str),
+
+    hover_name="CustomerID",
+
+    size="Age",
+
+    template="plotly_dark",
+
+    height=650,
+
+    color_discrete_sequence=px.colors.qualitative.Bold
+
+)
+
+fig.update_traces(marker=dict(line=dict(width=1,color="white")))
+
+fig.update_layout(
+
+    paper_bgcolor="#09090B",
+
+    plot_bgcolor="#09090B",
+
+    title_x=.5,
+
+    legend_title="Cluster"
+
+)
+
+st.plotly_chart(
+    fig,
+    use_container_width=True
+)
+
+st.markdown("---")
+
+# ---------------- PIE + BAR ---------------- #
+
+left,right = st.columns(2)
+
+with left:
+
+    st.subheader("🥧 Cluster Distribution")
+
+    pie = px.pie(
+
+        df,
+
+        names="Cluster",
+
+        hole=.55,
+
+        template="plotly_dark",
+
+        color_discrete_sequence=px.colors.qualitative.Bold
+
+    )
+
+    pie.update_layout(
+        paper_bgcolor="#09090B"
+    )
+
+    st.plotly_chart(
+        pie,
+        use_container_width=True
+    )
+
+with right:
+
+    st.subheader("📈 Customers per Cluster")
+
+    bar = px.bar(
+
+        df["Cluster"].value_counts().sort_index(),
+
+        template="plotly_dark",
+
+        color=df["Cluster"].value_counts().sort_index().index.astype(str),
+
+        color_discrete_sequence=px.colors.qualitative.Bold
+
+    )
+
+    bar.update_layout(
+
+        xaxis_title="Cluster",
+
+        yaxis_title="Customers",
+
+        paper_bgcolor="#09090B",
+
+        showlegend=False
+
+    )
+
+    st.plotly_chart(
+        bar,
+        use_container_width=True
+    )
+
+st.markdown("---")
