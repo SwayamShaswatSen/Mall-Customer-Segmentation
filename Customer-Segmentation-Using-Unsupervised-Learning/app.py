@@ -3,6 +3,37 @@ import pandas as pd
 import plotly.express as px
 from sklearn.cluster import KMeans
 
+st.set_page_config(
+    page_title="Mall Customer Analytics",
+    page_icon="🛍️",
+    layout="wide"
+)
+
+st.markdown("""
+<style>
+
+.main{
+    background:#0E1117;
+}
+
+h1{
+    color:white;
+}
+
+.stMetric{
+    background:#1E1E1E;
+    padding:15px;
+    border-radius:15px;
+    box-shadow:0px 0px 20px rgba(0,255,255,.15);
+}
+
+div[data-testid="stDataFrame"]{
+    border-radius:15px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="Mall Customer Segmentation", layout="wide")
 
 st.title("🛍️ Mall Customer Segmentation")
