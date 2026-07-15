@@ -4,114 +4,145 @@ import plotly.express as px
 from sklearn.cluster import KMeans
 from pathlib import Path
 
-# -----------------------------
-# Page Configuration
-# -----------------------------
 st.set_page_config(
-    page_title="Mall Customer Analytics",
-    page_icon="🛍️",
+    page_title="Retail Customer Intelligence",
+    page_icon="📊",
     layout="wide"
 )
 
-# -----------------------------
-# Load Dataset
-# -----------------------------
 BASE_DIR = Path(__file__).parent
 df = pd.read_csv(BASE_DIR / "Mall_Customers.csv")
 
-# -----------------------------
-# Sidebar
-# -----------------------------
-st.sidebar.title("🛍️ Navigation")
+st.sidebar.title("📊 Retail Intelligence")
 
-page = st.sidebar.radio(
-    "Select Page",
-    [
-        "🏠 Home",
-        "📂 Customer Data",
-        "📊 Visual Analysis",
-        "🤖 Customer Clusters",
-        "💡 Insights",
-        "⬇ Export",
-        "ℹ About"
-    ]
+page = st.sidebar.selectbox(
+    "Navigate",
+    (
+        "Dashboard",
+        "Customer Explorer",
+        "Spending Analytics",
+        "Smart Segmentation",
+        "Marketing Suggestions",
+        "Export Report",
+        "About"
+    )
 )
+# ===========================
+# DASHBOARD
+# ===========================
 
-# -----------------------------
-# Home Page
-# -----------------------------
-if page == "🏠 Home":
+if page == "Dashboard":
 
-    st.title("🛍️ Mall Customer Analytics Dashboard")
-    st.write("### Internship Project")
+    st.title("📊 Retail Customer Intelligence")
+
     st.write(
-        "This dashboard uses the K-Means Clustering algorithm "
-        "to group customers according to their Annual Income and Spending Score."
+        "Analyze customer behaviour using Machine Learning and K-Means Clustering."
     )
 
-    col1, col2, col3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns(4)
 
-    with col1:
-        st.metric("Customers", len(df))
+    c1.metric(
+        "Customers",
+        len(df)
+    )
 
-    with col2:
-        st.metric("Clusters", 5)
+    c2.metric(
+        "Average Age",
+        round(df["Age"].mean(),1)
+    )
 
-    with col3:
-        st.metric(
-            "Average Income",
-            f"${df['Annual Income (k$)'].mean():.1f}k"
-        )
+    c3.metric(
+        "Average Income",
+        round(df["Annual Income (k$)"].mean(),1)
+    )
+
+    c4.metric(
+        "Average Spending",
+        round(df["Spending Score (1-100)"].mean(),1)
+    )
 
     st.divider()
 
-    st.subheader("Project Overview")
+    st.subheader("Dataset Snapshot")
 
-    st.info("""
-This project demonstrates customer segmentation using the K-Means clustering algorithm.
+    st.dataframe(df.head(10),use_container_width=True)
 
-The dashboard allows us to:
+    st.info(
+        "Use the menu on the left to explore customer information, analytics and segmentation."
+    )
 
-• View customer information
+# ===========================
+# CUSTOMER EXPLORER
+# ===========================
 
-• Visualize spending patterns
+elif page == "Customer Explorer":
 
-• Create customer clusters
+    st.title("👥 Customer Explorer")
 
-• Understand business insights
-""")
-    # -----------------------------
-# Customer Data Page
-# -----------------------------
-elif page == "📂 Customer Data":
+    customer = st.slider(
+        "Choose Customer ID",
+        1,
+        len(df),
+        1
+    )
 
-    st.title("📂 Customer Dataset")
+    row = df[df["CustomerID"]==customer]
 
-    st.write("Preview of the mall customer dataset.")
+    st.write(row)
 
-    st.dataframe(df)
+    st.subheader("Customer Details")
 
-    st.subheader("Dataset Information")
+    st.write(
+        f"Gender : {row.iloc[0]['Gender']}"
+    )
+
+    st.write(
+        f"Age : {row.iloc[0]['Age']}"
+    )
+
+    st.write(
+        f"Annual Income : {row.iloc[0]['Annual Income (k$)']} K$"
+    )
+
+    st.write(
+        f"Spending Score : {row.iloc[0]['Spending Score (1-100)']}"
+    )
+    # ===========================
+# SPENDING ANALYTICS
+# ===========================
+
+elif page == "Spending Analytics":
+
+    st.title("📈 Spending Analytics")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.write(f"**Rows:** {df.shape[0]}")
-        st.write(f"**Columns:** {df.shape[1]}")
+
+        fig1 = px.histogram(
+            df,
+            x="Age",
+            nbins=20,
+            title="Age Distribution",
+            color="Gender"
+        )
+
+        st.plotly_chart(fig1, use_container_width=True)
 
     with col2:
-        st.write("**Columns Available:**")
-        st.write(list(df.columns))
 
+        fig2 = px.histogram(
+            df,
+            x="Annual Income (k$)",
+            nbins=20,
+            title="Income Distribution"
+        )
 
-# -----------------------------
-# Visual Analysis Page
-# -----------------------------
-elif page == "📊 Visual Analysis":
+        st.plotly_chart(fig2, use_container_width=True)
 
-    st.title("📊 Customer Distribution")
+    st.divider()
 
-    fig = px.scatter(
+    fig3 = px.scatter(
         df,
         x="Annual Income (k$)",
         y="Spending Score (1-100)",
@@ -121,148 +152,89 @@ elif page == "📊 Visual Analysis":
         title="Income vs Spending Score"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig3, use_container_width=True)
 
-    st.subheader("Age Distribution")
+    st.subheader("Quick Observations")
 
-    fig2 = px.histogram(
-        df,
-        x="Age",
-        nbins=20,
-        color="Gender",
-        title="Customer Age Distribution"
+    st.markdown("""
+- Younger customers generally show higher spending.
+- Spending varies even among customers with similar income.
+- Customer behaviour cannot be explained using income alone.
+""")
+    # ===========================
+# SMART SEGMENTATION
+# ===========================
+
+elif page == "Smart Segmentation":
+
+    st.title("🧠 Smart Customer Segmentation")
+
+    clusters = st.slider(
+        "Select Number of Customer Segments",
+        min_value=2,
+        max_value=10,
+        value=5
     )
-
-    st.plotly_chart(fig2, use_container_width=True)
-    # -----------------------------
-# Customer Clusters Page
-# -----------------------------
-elif page == "🤖 Customer Clusters":
-
-    st.title("🤖 K-Means Customer Segmentation")
 
     X = df[["Annual Income (k$)", "Spending Score (1-100)"]]
 
     model = KMeans(
-        n_clusters=5,
+        n_clusters=clusters,
         random_state=42,
         n_init=10
     )
 
     df["Cluster"] = model.fit_predict(X)
+
+    cluster_names = {
+        0: "💎 Premium Customers",
+        1: "🛍 Regular Customers",
+        2: "💰 High Income - Low Spending",
+        3: "🎯 Budget Customers",
+        4: "⭐ High Spending Customers"
+    }
 
     fig = px.scatter(
         df,
         x="Annual Income (k$)",
         y="Spending Score (1-100)",
         color=df["Cluster"].astype(str),
-        title="Customer Segments",
-        labels={"color": "Cluster"}
+        hover_data=["CustomerID", "Age", "Gender"],
+        title="Customer Segments"
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Cluster Summary")
 
-    summary = df.groupby("Cluster").agg({
-        "Age": "mean",
-        "Annual Income (k$)": "mean",
-        "Spending Score (1-100)": "mean"
-    }).round(2)
-
-    st.dataframe(summary, use_container_width=True)
-    # -----------------------------
-# Business Insights Page
-# -----------------------------
-elif page == "💡 Insights":
-
-    st.title("💡 Business Insights")
-
-    X = df[["Annual Income (k$)", "Spending Score (1-100)"]]
-
-    model = KMeans(
-        n_clusters=5,
-        random_state=42,
-        n_init=10
-    )
-
-    df["Cluster"] = model.fit_predict(X)
-
-    summary = df.groupby("Cluster").agg({
-        "Age": "mean",
-        "Annual Income (k$)": "mean",
-        "Spending Score (1-100)": "mean"
-    }).round(2)
+    summary = df.groupby("Cluster")[
+        ["Age", "Annual Income (k$)", "Spending Score (1-100)"]
+    ].mean().round(2)
 
     st.dataframe(summary, use_container_width=True)
 
-    st.markdown("### Recommendations")
+    st.subheader("Segment Description")
 
-    st.success("""
-**Cluster 0:** Focus on loyalty rewards.
+    for cluster in sorted(df["Cluster"].unique()):
 
-**Cluster 1:** Offer premium products.
+        st.markdown(f"### {cluster_names.get(cluster, f'Cluster {cluster}')}")
 
-**Cluster 2:** Target with discounts.
+        age = summary.loc[cluster, "Age"]
+        income = summary.loc[cluster, "Annual Income (k$)"]
+        spending = summary.loc[cluster, "Spending Score (1-100)"]
 
-**Cluster 3:** Improve engagement through marketing.
+        st.write(f"Average Age : {age}")
+        st.write(f"Average Income : {income} K$")
+        st.write(f"Average Spending Score : {spending}")
 
-**Cluster 4:** Maintain customer satisfaction with personalized offers.
-""")
+        if income > 60 and spending > 60:
+            st.success("Marketing Strategy: Offer premium memberships and exclusive rewards.")
 
-# -----------------------------
-# Export Page
-# -----------------------------
-elif page == "⬇ Export":
+        elif income > 60 and spending <= 60:
+            st.info("Marketing Strategy: Encourage spending with personalized offers.")
 
-    st.title("⬇ Export Data")
+        elif income <= 60 and spending > 60:
+            st.warning("Marketing Strategy: Promote loyalty programs and discounts.")
 
-    X = df[["Annual Income (k$)", "Spending Score (1-100)"]]
-
-    model = KMeans(
-        n_clusters=5,
-        random_state=42,
-        n_init=10
-    )
-
-    df["Cluster"] = model.fit_predict(X)
-
-    csv = df.to_csv(index=False).encode("utf-8")
-
-    st.download_button(
-        label="📥 Download Clustered Dataset",
-        data=csv,
-        file_name="Mall_Customers_Segmented.csv",
-        mime="text/csv"
-    )
-
-# -----------------------------
-# About Page
-# -----------------------------
-elif page == "ℹ About":
-
-    st.title("ℹ About Project")
-
-    st.markdown("""
-### Mall Customer Segmentation using K-Means
-
-**Project Type:** Internship Project
-
-**Machine Learning:** Unsupervised Learning
-
-**Algorithm:** K-Means Clustering
-
-**Dataset:** Mall Customers Dataset
-
-**Tools Used:**
-- Python
-- Pandas
-- Plotly
-- Scikit-Learn
-- Streamlit
-
----
-
-**Developed by:**  
-**Swayam Shaswat Sen**
-""")
+        else:
+            st.error("Marketing Strategy: Focus on budget-friendly campaigns.")
